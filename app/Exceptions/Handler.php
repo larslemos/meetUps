@@ -16,8 +16,11 @@ class Handler extends ExceptionHandler
      * @var array
      */
     protected $dontReport = [
-        HttpException::class,
-        ModelNotFoundException::class,
+       AuthorizationException::class,
+       HttpException::class,
+       ModelNotFoundException::class,
+       TokenMismatchException::class,
+       ValidationException::class,
     ];
 
     /**
@@ -43,14 +46,20 @@ class Handler extends ExceptionHandler
     public function render($request, Exception $e)
     {
         if ($e instanceof ModelNotFoundException) {
-            $e = new NotFoundHttpException($e->getMessage(), $e);
-        }
 
-        if ( $request->isJson() ) {
-          return Response::json([
-            'error' => [
-              'exception' => class_basename($e). ' in '.basename( $e->getFile()).' line '. $e->getLine(). ': ' .$e->getMessage(),
-            ] ], 500);
+            $e = new NotFoundHttpException($e->getMessage(), $e);
+
+            // if ( $request->isJson() ) {
+            //   return Response::json([
+            //     'error' => [
+            //       'exception' =>
+            //       class_basename($e).' in '.basename( $e->getFile()).' line '. $e->getLine().': '.$e->getMessage(),
+            //     ] ], 500);
+            // }
+            //
+            // if($request->ajax()) {
+            //   return response()->json(['error'=> 'Not found'], 400);
+            // } 
         }
 
         return parent::render($request, $e);

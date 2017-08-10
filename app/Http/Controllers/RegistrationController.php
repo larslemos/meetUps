@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use App\Meeting;
+use App\User;
 
 class RegistrationController extends Controller
 {
@@ -20,32 +22,37 @@ class RegistrationController extends Controller
     {
       $this->validate($request, [
           'meeting_id'=> 'required',
-          'user_id' =>'requerid'  
+          'user_id' =>'required'
       ]);
 
       $meeting_id = $request->input('meeting_id');
       $user_id = $request->input('user_id');
 
-      $meeting = [
-        'title'=>$title,
-        'description'=>$description,
-        'time'=>$time,
-        'view_meeting'=> [
-          'href'=> 'api/v1/meeting/1',
-          'method'=> 'GET'
-        ]
+      $meeting = Meeting::findOrFail($meeting_id);
+      $user = User::findOrFail($user_id);
+
+      $message = [
+          'msg'=> 'User is already resgistering for meeting',
+          'user'=> $user,
+          'meeting' => $meeting,
+          'unregister' => [
+              'href' => 'api/v1/meeting/registration'.$meeting->id,
+              'method' => 'DELETE',
+          ]
       ];
 
-      $user = [
-        'name'=> 'Name'
-      ];
+      if($meeting->users()->where('users.id', $user->id)->first()) {
+          return response()->json($message, 404);
+      };
+
+      $user->meetings()->attach($meeting);
 
       $response = [
         'msg'=> 'User resgitering for meeting',
         'meeting'=> $meeting,
         'user' => $user,
         'unregister' => [
-            'href'=> 'api/v1/meeting/resgistration/1',
+            'href'=> 'api/v1/meeting/resgistration/'.$meeting_id,
             'method'=> 'DELETE'
         ]
       ];
@@ -83,26 +90,15 @@ class RegistrationController extends Controller
      */
     public function destroy($id)
     {
-      $meeting = [
-        'title'=>'Title',
-        'description'=>'Description',
-        'time'=>'Time',
-        'view_meeting'=> [
-          'href'=> 'api/v1/meeting/1',
-          'method'=> 'GET'
-        ]
-      ];
-
-      $user = [
-        'name'=> 'Name'
-      ];
+      $meeting = Meeting::findOrFail($id);
+      $meeting->users()->detach();
 
       $response = [
         'msg'=> 'User unresgitering for meeting',
         'meeting'=> $meeting,
-        'user' => $user,
-        'unregister' => [
-            'href'=> 'api/v1/meeting/resgistration/1',
+        'user' => 'tbd',
+        'register' => [
+            'href'=> 'api/v1/meeting/resgistration',
             'method'=> 'POST',
             'params'=> 'user_id, meeting_id'
         ]

@@ -12,7 +12,7 @@ class CreateMeetingUserTable extends Migration
      */
     public function up()
     {
-        Schema::create('mmeting_user', function(Blueprint $table) {
+        Schema::create('meeting_user', function(Blueprint $table) {
           $table->increments('id');
           $table->timestamps();
           $table->integer('user_id');
