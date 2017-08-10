@@ -12,6 +12,13 @@ use App\User;
 class RegistrationController extends Controller
 {
 
+    public function __construct()
+    {
+        $this->middleware('jwt.auth', ['only' => [
+            'update', 'store', 'destroy'
+          ]]);
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -21,8 +28,8 @@ class RegistrationController extends Controller
     public function store(Request $request)
     {
       $this->validate($request, [
-          'meeting_id'=> 'required',
-          'user_id' =>'required'
+          'meeting_id'=> 'required|numeric',
+          'user_id' =>'required|numeric'
       ]);
 
       $meeting_id = $request->input('meeting_id');
